@@ -1,5 +1,6 @@
 import "./styles.css";
 import { format } from "date-fns";
+import { getIcon } from "./icons.js";
 
 let unitSystem = "metric";
 const apiKey = "XU6MRLHJAPADPYD5A24SMVMJ4";
@@ -78,11 +79,12 @@ function buildPageFromData(data) {
   forecastHourly.replaceChildren();
 
   const today = data.days[0];
-  overviewLoc.textContent = data.address;
+  overviewLoc.textContent =
+    data.address.charAt(0).toUpperCase() + data.address.slice(1);
   overviewConds.textContent = today.conditions;
   overviewTemp.textContent = today.temp + "°";
-  overviewTempFL.textContent = `Feels like ${today.feelslike}°${getUnitSymbol()}`;
-  overviewPrecipChanceHeader.textContent = `Chance of ${today.precipType != null ? today.preciptype[0].charAt(0).toUpperCase() + today.preciptype[0].slice(1) : "Precip."}`;
+  overviewTempFL.textContent = `Feels like ${today.feelslike}${getUnitSymbol()}`;
+  overviewPrecipChanceHeader.textContent = `Chance of ${today.preciptype != null ? today.preciptype[0].charAt(0).toUpperCase() + today.preciptype[0].slice(1) : "Precip."}`;
   overviewPrecipChance.textContent = today.precipprob + "%";
   overviewHumidity.textContent = today.humidity + "%";
   overviewUVIndex.textContent = today.uvindex;
@@ -96,19 +98,23 @@ function buildPageFromData(data) {
 
     const time = document.createElement("p");
     time.textContent =
-      idx === 0 ? "12AM" : idx > 12 ? idx - 12 + "PM" : idx + "AM";
+      idx === 0
+        ? "12 am"
+        : idx === 12
+          ? "12 pm"
+          : idx > 12
+            ? idx - 12 + " pm"
+            : idx + " am";
     container.append(time);
 
-    const infoContainer = document.createElement("div");
-    container.append(infoContainer);
+    const icon = document.createElement("img");
+    icon.src = getIcon(hour.icon);
+
+    container.append(icon);
 
     const temp = document.createElement("p");
     temp.textContent = hour.temp + getUnitSymbol();
-    infoContainer.append(temp);
-
-    const precipChance = document.createElement("p");
-    precipChance.textContent = hour.precipprob + "%";
-    infoContainer.append(precipChance);
+    container.append(temp);
 
     forecastHourly.append(container);
 

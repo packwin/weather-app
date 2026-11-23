@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 p,
 h1,
 h2,
@@ -45,7 +49,9 @@ header {
 }
 
 #content {
-  grid-area: 2 1 3 -1;
+  grid-area: 2 / 1 / 3 / -1;
+  width: 100%;
+  min-width: 0;
   padding: 0 15vw;
 
   display: flex;
@@ -69,7 +75,7 @@ header {
 
 #overview-info-main {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 #overview-temp {
@@ -79,8 +85,25 @@ header {
 #forecast-hourly {
   grid-area: 1 / 1 / 1 / 2;
   display: flex;
+  gap: 0.5em;
 
-  overflow: auto;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.forecast-hourly-entry {
+  padding: 1em;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+
+  min-width: 100px;
+}
+
+.forecast-hourly-entry > div {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
 }
 
 #overview-info-more {
