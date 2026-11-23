@@ -1,5 +1,5 @@
 import "./styles.css";
-import { format } from "date-fns";
+import { format, addDays, parseISO } from "date-fns";
 import { getIcon } from "./icons.js";
 
 let unitSystem = "metric";
@@ -26,6 +26,7 @@ const overviewWindSpeed = document.getElementById("overview-wind-speed");
 const btnUnitSys = document.getElementById("btn-unit-sys");
 
 const forecastHourly = document.getElementById("forecast-hourly");
+const forecastDaily = document.getElementById("forecast-daily");
 
 btnSearch.addEventListener("click", () => {
   getWeatherData(inputLoc.value).then((data) => buildPageFromData(data));
@@ -48,10 +49,12 @@ btnUnitSys.addEventListener("click", () => {
 
 async function getWeatherData(location) {
   try {
-    const date = format(new Date(), "yyyy-M-d");
+    const today = new Date();
+    const startDate = format(today, "yyyy-M-d");
+    const endDate = format(addDays(today, 14), "yyyy-M-d");
 
     const response = await fetch(
-      `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}/${date}?unitGroup=${unitSystem}&key=${apiKey}`,
+      `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}/${startDate}/${endDate}?unitGroup=${unitSystem}&key=${apiKey}`,
     );
 
     if (!response.ok) {
@@ -76,6 +79,7 @@ async function getWeatherData(location) {
 function buildPageFromData(data) {
   console.log(data);
 
+  // #region Overview
   forecastHourly.replaceChildren();
 
   const today = data.days[0];
@@ -91,20 +95,15 @@ function buildPageFromData(data) {
   overviewWindSpeed.textContent =
     today.windspeed + (unitSystem === "metric" ? "km/h" : "mph");
 
-  let idx = 0;
-  today.hours.forEach((hour) => {
+  const totalHours = today.hours.concat(data.days[1].hours);
+  let hourNodes = [];
+  totalHours.forEach((hour) => {
     const container = document.createElement("div");
     container.classList.add("forecast-hourly-entry");
 
     const time = document.createElement("p");
-    time.textContent =
-      idx === 0
-        ? "12 am"
-        : idx === 12
-          ? "12 pm"
-          : idx > 12
-            ? idx - 12 + " pm"
-            : idx + " am";
+    const hourNumber = parseInt(hour.datetime.split(":")[0]);
+    time.textContent = `${hourNumber % 12 || 12} ${hourNumber < 12 ? "am" : "pm"}`;
     container.append(time);
 
     const icon = document.createElement("img");
@@ -117,9 +116,43 @@ function buildPageFromData(data) {
     container.append(temp);
 
     forecastHourly.append(container);
-
-    idx++;
+    hourNodes.push(container);
   });
+
+  const hour = Math.ceil(
+    (((new Date().getUTCHours() + data.tzoffset) % 24) + 24) % 24,
+  );
+  hourNodes[hour].scrollIntoView({
+    behavior: "instant",
+    block: "center",
+    inline: "center",
+  });
+  hourNodes[hour].classList.add("forecast-hourly-entry-current-hour");
+  // #endregion
+
+  // #region Daily Forecast
+  forecastDaily.replaceChildren();
+
+  data.days.forEach((day) => {
+    const container = document.createElement("div");
+    container.classList.add("forecast-hourly-entry");
+
+    const dayName = document.createElement("p");
+    dayName.textContent = format(parseISO(day.datetime), "EEEE");
+    container.append(dayName);
+
+    const icon = document.createElement("img");
+    icon.src = getIcon(day.icon);
+
+    container.append(icon);
+
+    const temp = document.createElement("p");
+    temp.textContent = day.temp + getUnitSymbol();
+    container.append(temp);
+
+    forecastDaily.append(container);
+  });
+  // #endregion
 }
 
 function getUnitSymbol() {

@@ -61,11 +61,13 @@ header {
 }
 
 #overview {
+  margin-top: 1em;
   padding: 2%;
   display: flex;
   flex-flow: column;
 
   background-color: whitesmoke;
+  border-radius: 1em;
 }
 
 #overview-header {
@@ -106,6 +108,10 @@ header {
   align-items: center;
 }
 
+.forecast-hourly-entry-current-hour {
+  border: 1px solid gold;
+}
+
 #overview-info-more {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -115,6 +121,24 @@ header {
 
 .more-info {
   align-self: center;
+}
+
+#forecast-daily-container {
+  margin-top: 1em;
+  padding: 2%;
+  display: flex;
+  flex-flow: column;
+  gap: 0.5em;
+
+  min-width: 0;
+  overflow-x: auto;
+
+  background-color: whitesmoke;
+  border-radius: 1em;
+}
+
+#forecast-daily {
+  display: flex;
 }
 
 footer {
