@@ -3,11 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weather App</title>
+    <title>Caelus Weather</title>
   </head>
   <body>
     <header>
-      <h1>Wedrome</h1>
+      <div id="logo">
+        <h1>Caelus</h1>
+        <h2>Weather</h2>
+      </div>
+
       <div id="search">
         <input
           id="input-location"
@@ -17,7 +21,6 @@
         <button id="btn-search">Search</button>
       </div>
       <button id="btn-unit-sys">C°</button>
-      <!-- button to switch from imperial to metric -->
     </header>
 
     <div id="content">
@@ -26,7 +29,6 @@
           <h2 id="overview-location">Location</h2>
           <h2 id="overview-conditions">Overview condition</h2>
         </div>
-        <!-- background image -->
         <div id="overview-info-main">
           <div id="overview-temp-container">
             <h1 id="overview-temp">99°</h1>

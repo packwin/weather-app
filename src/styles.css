@@ -1,5 +1,23 @@
+@font-face {
+  font-family: "Nunito";
+  src: url("./fonts/Nunito/Nunito-VariableFont_wght.ttf");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: url("./fonts/Nunito/Nunito-Italic-VariableFont_wght.ttf");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "YujiSyuku";
+  src: url(./fonts/Yuji_Syuku/YujiSyuku-Regular.ttf);
+}
+
 * {
   box-sizing: border-box;
+  font-family: "Nunito";
 }
 
 p,
@@ -18,16 +36,38 @@ body {
 
   display: grid;
   grid-template-rows: 6rem 1fr 4rem;
-
-  background-color: lightgrey;
 }
 
 header {
   grid-area: 1 / 1 / 2 / -1;
-  padding: 0 3em;
+  padding: 0 1.5em;
   display: flex;
   align-items: center;
   gap: 1em;
+
+  background-color: #585a6e;
+}
+
+#logo {
+  display: flex;
+  position: relative;
+}
+
+#logo h1 {
+  color: white;
+  font-family: "YujiSyuku";
+  font-size: 3rem;
+  padding-bottom: 0.6em;
+}
+
+#logo h2 {
+  position: absolute;
+  align-self: flex-end;
+  top: 2em;
+  left: 1.5em;
+
+  color: white;
+  font-family: "YujiSyuku";
 }
 
 #search {
@@ -57,7 +97,7 @@ header {
   display: flex;
   flex-flow: column;
 
-  background-color: grey;
+  background-color: #14151e;
 }
 
 #overview {
@@ -67,7 +107,10 @@ header {
   flex-flow: column;
 
   background-color: whitesmoke;
-  border-radius: 1em;
+  border-radius: 0.5em;
+
+  background-size: cover;
+  background-position: center;
 }
 
 #overview-header {
@@ -134,11 +177,15 @@ header {
   overflow-x: auto;
 
   background-color: whitesmoke;
-  border-radius: 1em;
+  border-radius: 0.5em;
 }
 
 #forecast-daily {
   display: flex;
+}
+
+.forecast-hourly-entry-today {
+  border: 1px solid gold;
 }
 
 footer {
@@ -146,4 +193,6 @@ footer {
 
   display: flex;
   align-items: center;
+
+  background-color: #585a6e;
 }
