@@ -35,6 +35,8 @@ const forecastDailyContainer = document.getElementById(
 );
 const forecastDaily = document.getElementById("forecast-daily");
 
+const spinner = document.getElementById("spinner");
+
 btnSearch.addEventListener("click", () => {
   handleSearch(inputLoc.value);
 });
@@ -74,12 +76,14 @@ async function getWeatherData(location) {
 
 async function handleSearch(query) {
   try {
+    spinner.style.display = "inline";
     const data = await getWeatherData(query);
 
     lastLoc = query;
     overview.style.display = "flex";
     forecastDailyContainer.style.display = "flex";
     buildPageFromData(data);
+    spinner.style.display = "none";
   } catch (error) {
     console.error(error);
     if (error.status) {
@@ -91,6 +95,7 @@ async function handleSearch(query) {
         `Could not fetch data for query "${inputLoc.value}": ${error.message}`,
       );
     }
+    spinner.style.display = "none";
   }
 }
 
@@ -100,7 +105,7 @@ function buildPageFromData(data) {
   // #region Overview
   forecastHourly.replaceChildren();
 
-  const todayStr = formatInTimeZone(new Date(), data.timezone, "yyyy-M-d");
+  const todayStr = formatInTimeZone(new Date(), data.timezone, "yyyy-MM-dd");
   const todayIndex = data.days.findIndex((day) => day.datetime === todayStr);
   const today = data.days[todayIndex];
 
@@ -118,12 +123,23 @@ function buildPageFromData(data) {
 
   const yesterday = data.days[todayIndex - 1];
   const tomorrow = data.days[todayIndex + 1];
-
   const totalHours = [
-    ...yesterday.slice(12),
+    ...yesterday.hours.slice(12),
     ...today.hours,
-    ...tomorrow.slice(0, 12),
+    ...tomorrow.hours.slice(0, 12),
   ];
+
+  const nowTime = formatInTimeZone(new Date(), data.timezone, "HH:mm:ss");
+  const hour = parseInt(nowTime.split(":")[0]);
+  const period =
+    nowTime > today.sunrise && nowTime < today.sunset ? "day" : "night";
+  const textOutline = period === "day" ? "white" : "black";
+  overview.style.textShadow = `
+    -1px -1px 0 ${textOutline},  
+     1px -1px 0 ${textOutline},
+    -1px  1px 0 ${textOutline},
+     1px  1px 0 ${textOutline}
+  `;
 
   let hourNodes = [];
   totalHours.forEach((hour) => {
@@ -135,10 +151,22 @@ function buildPageFromData(data) {
     time.textContent = `${hourNumber % 12 || 12} ${hourNumber < 12 ? "am" : "pm"}`;
     container.append(time);
 
-    const icon = document.createElement("img");
-    icon.src = getIcon(hour.icon);
+    const icon = document.createElement("span");
+    icon.classList.add("icon");
+    icon.style.maskImage = `url(${getIcon(hour.icon)})`;
+    icon.style.backgroundColor = period === "day" ? "black" : "white";
 
-    container.append(icon);
+    const iconWrapper = document.createElement("div");
+    iconWrapper.classList.add("icon-wrapper");
+    const outlineColour = period === "day" ? "white" : "black";
+    iconWrapper.style.filter = `
+      drop-shadow(1px 0 0 ${outlineColour})
+      drop-shadow(-1px 0 0 ${outlineColour})
+      drop-shadow(0 1px 0 ${outlineColour})
+      drop-shadow(0 -1px 0 ${outlineColour})
+    `;
+    iconWrapper.append(icon);
+    container.append(iconWrapper);
 
     const temp = document.createElement("p");
     temp.textContent = hour.temp + getUnitSymbol();
@@ -148,25 +176,27 @@ function buildPageFromData(data) {
     hourNodes.push(container);
   });
 
-  const hour = Math.ceil(
-    (((new Date().getUTCHours() + data.tzoffset) % 24) + 24) % 24,
-  );
-  hourNodes[hour].scrollIntoView({
+  hourNodes[hour + 12].scrollIntoView({
     behavior: "instant",
     block: "center",
     inline: "center",
   });
-  hourNodes[hour].classList.add("forecast-hourly-entry-current-hour");
+  hourNodes[hour + 12].classList.add("forecast-hourly-entry-current-hour");
 
   const name = today.icon;
+  const tint = period === "day" ? "255, 255, 255" : "0, 0, 0";
   if (
     !name.includes("day") ||
     (!name.includes("night") && name !== "thunder-rain")
   ) {
-    overview.style.backgroundImage.src = getBackgroundImg(
-      name +
-        `-${hour > today.sunrise && hour < today.sunset ? "day" : "night"}`,
-    );
+    overview.style.backgroundImage = `
+    linear-gradient(270deg, 
+    rgba(${tint}, 0) 50%, 
+    rgba(${tint}, 1) 80%
+    ),
+    url("${getBackgroundImg(`${name}-${period}`)}")
+    `;
+    overview.style.color = period === "day" ? "black" : "white";
   }
 
   // #endregion
@@ -196,7 +226,7 @@ function buildPageFromData(data) {
     dayNodes.push({ day: day.datetime, node: container });
   });
 
-  const dayDate = formatInTimeZone(new Date(), data.timezone, "yyyy-M-d");
+  const dayDate = formatInTimeZone(new Date(), data.timezone, "yyyy-MM-dd");
 
   const todayNode = dayNodes.find((day) => day.day === dayDate).node;
   todayNode.classList.add("forecast-hourly-entry-today");
